@@ -11,7 +11,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-      origin: "http://localhost:3000", // Your frontend origin
+      origin: ["http://localhost:3000", "https://voice-front-three.vercel.app"], // Allowed frontend origins
       methods: ["GET", "POST"], // Allowed HTTP methods
       allowedHeaders: ["Content-Type"], // Allowed headers
     },
