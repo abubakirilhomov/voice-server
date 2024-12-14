@@ -12,7 +12,7 @@ const server = http.createServer(app);
 // Configure Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://voice-front-three.vercel.app"], // Frontend origins
+    origin: ["http://localhost:3000", "http://localhost:3001", "https://voice-front-three.vercel.app"], // Frontend origins
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
   },
