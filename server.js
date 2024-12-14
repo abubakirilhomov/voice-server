@@ -34,20 +34,25 @@ io.on("connection", (socket) => {
   
     // Отправляем всем пользователям список подключённых
     const updateUsers = () => {
-      const clients = Array.from(io.sockets.sockets.values()).map((s) => ({
-        id: s.id,
-      }));
-      io.emit("users", clients);
-    };
+        const clients = Array.from(io.sockets.sockets.values()).map((s) => ({
+          id: s.id,
+          name: s.handshake.query.name || `User ${s.id}`, // Если имя передаётся
+        }));
+        io.emit("users", clients);
+      };      
   
     updateUsers();
   
     socket.on("signal", (data) => {
-      io.to(data.target).emit("signal", {
-        sender: socket.id,
-        signal: data.signal,
-      });
-    });
+        if (data.target && data.signal) {
+          io.to(data.target).emit("signal", {
+            sender: socket.id,
+            signal: data.signal,
+          });
+        } else {
+          console.error("Invalid signal data:", data);
+        }
+      });      
   
     socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);
