@@ -9,7 +9,13 @@ const userRoutes = require("./routes/userRoutes"); // Подключаем ро�
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+      origin: "http://localhost:3000", // Your frontend origin
+      methods: ["GET", "POST"], // Allowed HTTP methods
+      allowedHeaders: ["Content-Type"], // Allowed headers
+    },
+  });
 const PORT = 5000;
 
 // Middleware
@@ -24,20 +30,30 @@ app.use("/api/users", userRoutes);
 
 // WebSocket handlers
 io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
-
-  // Обработчик для пересылки сигналов WebRTC
-  socket.on("signal", (data) => {
-    io.to(data.target).emit("signal", {
-      sender: socket.id,
-      signal: data.signal,
+    console.log("A user connected:", socket.id);
+  
+    // Отправляем всем пользователям список подключённых
+    const updateUsers = () => {
+      const clients = Array.from(io.sockets.sockets.values()).map((s) => ({
+        id: s.id,
+      }));
+      io.emit("users", clients);
+    };
+  
+    updateUsers();
+  
+    socket.on("signal", (data) => {
+      io.to(data.target).emit("signal", {
+        sender: socket.id,
+        signal: data.signal,
+      });
     });
-  });
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
-});
+  
+    socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.id);
+      updateUsers();
+    });
+  });  
 
 // Start the server
 server.listen(PORT, () => {
